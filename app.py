@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import UserAddForm, LoginForm, MessageForm, UserEditForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Likes
 
 CURR_USER_KEY = "curr_user"
 
@@ -181,6 +181,17 @@ def users_followers(user_id):
     return render_template('users/followers.html', user=user)
 
 
+@app.route('/users/<int:user_id>/likes')
+def users_likes(user_id):
+    """Show list of likes for this user."""
+
+    if not g.user:
+        flash("Access unauthorized.", "danger")
+        return redirect("/")
+
+    user = User.query.get_or_404(user_id)
+    return render_template('users/likes.html', user=user)
+
 @app.route('/users/follow/<int:follow_id>', methods=['POST'])
 def add_follow(follow_id):
     """Add a follow for the currently-logged-in user."""
@@ -258,6 +269,26 @@ def delete_user():
 
     return redirect("/signup")
 
+
+@app.route('/users/add_like/<int:message_id>', methods=["POST"])
+def like_message(message_id):
+    """Likes (or unlikes) a message."""
+
+    if not g.user:
+        flash("Must be logged in.", "warning")
+        return redirect("/login")
+
+    if message_id not in [like.id for like in g.user.likes]:
+        like = Likes(user_id=g.user.id, message_id=message_id)
+        db.session.add(like)
+        db.session.commit()
+
+    else:
+        like = Likes.query.filter(Likes.user_id==g.user.id,Likes.message_id==message_id).first()
+        db.session.delete(like)
+        db.session.commit()        
+
+    return redirect('/')
 
 ##############################################################################
 # Messages routes:

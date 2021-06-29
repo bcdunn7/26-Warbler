@@ -1,0 +1,38 @@
+{% extends 'users/detail.html' %}
+{% block user_details %}
+  <div class="col-sm-6">
+    <ul class="list-group" id="messages">
+
+      {% for message in user.likes %}
+
+        <li class="list-group-item">
+          <a href="/messages/{{ message.id }}" class="message-link"/>
+
+          <a href="/users/{{ message.user.id }}">
+            <img src="{{ message.user.image_url }}" alt="user image" class="timeline-image">
+          </a>
+
+          <div class="message-area">
+            <a href="/users/{{ message.user.id }}">@{{ message.user.username }}</a>
+            <span class="text-muted">{{ message.timestamp.strftime('%d %B %Y') }}</span>
+            <p>{{ message.text }}</p>
+          </div>
+          <!-- can only like messages that are non one's own: -->
+          {% if message.user.id != g.user.id %}
+          <form method="POST" action="/users/add_like/{{ message.id }}" id="messages-form">
+            <button class="
+              btn 
+              btn-sm 
+              {{'btn-warning' if message in g.user.likes else 'btn-secondary'}}"
+            >
+              <i class="fa fa-thumbs-up"></i> 
+            </button>
+          </form>
+          {% endif %}
+        </li>
+
+      {% endfor %}
+
+    </ul>
+  </div>
+{% endblock %}

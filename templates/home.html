@@ -51,15 +51,18 @@
               <span class="text-muted">{{ msg.timestamp.strftime('%d %B %Y') }}</span>
               <p>{{ msg.text }}</p>
             </div>
+            <!-- can only like messages that are non one's own: -->
+            {% if msg.user.id != g.user.id %}
             <form method="POST" action="/users/add_like/{{ msg.id }}" id="messages-form">
               <button class="
                 btn 
                 btn-sm 
-                {{'btn-primary' if msg.id in likes else 'btn-secondary'}}"
+                {{'btn-warning' if msg in g.user.likes else 'btn-secondary'}}"
               >
                 <i class="fa fa-thumbs-up"></i> 
               </button>
             </form>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>
