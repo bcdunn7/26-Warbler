@@ -7,6 +7,7 @@
 
 import os
 from unittest import TestCase
+from sqlalchemy import exc
 
 from models import db, User, Message, Follows
 
@@ -39,7 +40,28 @@ class UserModelTestCase(TestCase):
         Message.query.delete()
         Follows.query.delete()
 
+        user1 = User(
+            username="testuser1",
+            password="password",
+            email="testing@testing.com"
+        )
+
+        user2 = User(
+            username="testuser2",
+            password="password2",
+            email="testing2@testing.com"
+        )
+
+        db.session.add(user1)
+        db.session.add(user2)
+        db.session.commit()
+
         self.client = app.test_client()
+
+
+    def tearDown(self):
+        db.session.rollback()
+
 
     def test_user_model(self):
         """Does basic model work?"""
@@ -56,3 +78,94 @@ class UserModelTestCase(TestCase):
         # User should have no messages & no followers
         self.assertEqual(len(u.messages), 0)
         self.assertEqual(len(u.followers), 0)
+
+
+    def test_user_repr(self):
+        """Does repr work?"""
+
+        user = User.query.first()
+
+        self.assertEqual(str(user), f"<User #{user.id}: {user.username}, {user.email}>")
+
+    
+    def test_not_following(self):
+        """Correctly detects not following?"""
+
+        user1 = User.query.filter_by(username="testuser1").first()
+
+        self.assertNotIn('user2', str(user1.following))
+
+
+    def test_following(self):
+        """Correctly detects following?"""
+
+        user1 = User.query.filter_by(username="testuser1").first()
+        user2 = User.query.filter_by(username="testuser2").first()
+
+        follow = Follows(user_being_followed_id=f"{user2.id}", user_following_id=f"{user1.id}")
+
+        db.session.add(follow)
+        db.session.commit()
+
+        self.assertIn('testuser2', str(user1.following))
+
+
+    def test_is_not_followed(self):
+        """Correctly detects not followed?"""
+
+        user1 = User.query.filter_by(username="testuser1").first()
+
+        self.assertNotIn('user2', str(user1.followers))
+
+
+    def test_is_followed(self):
+        """Correctly detects followed?"""
+
+        user1 = User.query.filter_by(username="testuser1").first()
+        user2 = User.query.filter_by(username="testuser2").first()
+
+        follow = Follows(user_being_followed_id=f"{user2.id}", user_following_id=f"{user1.id}")
+
+        db.session.add(follow)
+        db.session.commit()
+
+        self.assertIn('testuser1', str(user2.followers))
+
+    def test_signup_user(self):
+        """Created user?"""
+
+        user = User.signup(
+            username="testuser3",
+            password="password3",
+            email="testing3@test.com",
+            image_url="image"
+            )
+
+        db.session.commit()
+
+        user3 = User.query.filter_by(username="testuser3").first()
+
+        self.assertEqual(user, user3)
+
+        self.assertTrue(user3.password.startswith('$2b$'))
+
+
+    def test_invalid_user_signup(self):
+        """Error if invalid user?"""
+
+        user = User.signup(
+            username="testuser1",
+            password="password3",
+            email="testing3@test.com",
+            image_url="image"
+            )
+
+        self.assertRaises(exc.InvalidRequestError)
+
+
+    def test_authenticate(self):
+        """Authenticates?"""
+
+        user = User.authenticate(username="testuser1", password="password")
+
+        self.assertTrue(user)
