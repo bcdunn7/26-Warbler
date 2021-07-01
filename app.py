@@ -215,7 +215,7 @@ def stop_following(follow_id):
         flash("Access unauthorized.", "danger")
         return redirect("/")
 
-    followed_user = User.query.get_or_404(follow_id)
+    followed_user = User.query.get(follow_id)
     g.user.following.remove(followed_user)
     db.session.commit()
 

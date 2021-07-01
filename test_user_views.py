@@ -275,24 +275,17 @@ class UserViewTestCase(TestCase):
 
             self.assertIsNone(follow)
 
-# ******************************************
 
-### ERROR ###
-    # def test_invalid_unfollow(self):
-    #     """Error if invalid follow?"""
+    def test_invalid_unfollow(self):
+        """Error if invalid follow?"""
 
-    #     # with self.client as c:
-    #     #     with c.session_transaction() as sess:
-    #     #         sess[CURR_USER_KEY] = self.testuser.id
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
-    #     #     # resp = c.post('/users/stop-following/1', follow_redirects=True)
-    #     with app.app_context():
-    #         with self.assertRaises(ValueError):
-    #             app.stop_following(1)
+            resp = c.post('/users/stop-following/1', follow_redirects=True)
+            self.assertRaises(ValueError)
 
-    #             #Error: Flask has no stop_following
-
-# *********************************************
 
     def test_unfollow_invalid_user(self):
         """Show unauthorized if invalid user for unfollow?"""
