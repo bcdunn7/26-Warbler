@@ -52,165 +52,165 @@ class UserViewTestCase(TestCase):
         db.session.commit()
 
     
-    # def test_list_users(self):
-    #     """Show list of users?"""
+    def test_list_users(self):
+        """Show list of users?"""
 
-    #     with self.client as c:
-    #         resp = c.get('/users')
+        with self.client as c:
+            resp = c.get('/users')
 
-    #         self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.status_code, 200)
 
-    #         self.assertIn("@testuser", str(resp.data))
-
-
-    # def test_list_users_if_none(self):
-    #     """View if no users?"""
-
-    #     User.query.delete()
-
-    #     with self.client as c:
-    #         resp = c.get('/users')
-
-    #         self.assertEqual(resp.status_code, 200)
-
-    #         self.assertIn("<h3>Sorry, no users found</h3>", str(resp.data))
-
-    
-    # def test_show_user_details(self):
-    #     """Show user details?"""
-
-    #     with self.client as c:
-    #         resp = c.get('/users/1')
-
-    #     self.assertEqual(resp.status_code, 200)
-
-    #     self.assertIn("@testuser", str(resp.data))
+            self.assertIn("@testuser", str(resp.data))
 
 
-    # def test_invalid_user_details(self):
-    #     """404 if invalid user?"""
+    def test_list_users_if_none(self):
+        """View if no users?"""
 
-    #     with self.client as c:
-    #         resp = c.get('/users/12345678')
+        User.query.delete()
 
-    #         self.assertEqual(resp.status_code, 404)
+        with self.client as c:
+            resp = c.get('/users')
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("<h3>Sorry, no users found</h3>", str(resp.data))
 
     
-    # def test_show_user_following(self):
-    #     """Show user following?"""
+    def test_show_user_details(self):
+        """Show user details?"""
 
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.testuser.id
+        with self.client as c:
+            resp = c.get('/users/1')
 
-    #         resp = c.get("/users/1/following")
+        self.assertEqual(resp.status_code, 200)
 
-    #         self.assertEqual(resp.status_code, 200)
-
-    #         self.assertIn("Unfollow", str(resp.data))
-
-    # def test_show_user_following_invalid_user(self):
-    #     """Show unauthorized if invalid user for user following?"""
-
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = 12345678
-
-    #         resp = c.get("/users/1/following", follow_redirects=True)
-
-    #         self.assertEqual(resp.status_code, 200)
-
-    #         self.assertIn("unauthorized", str(resp.data))
+        self.assertIn("@testuser", str(resp.data))
 
 
-    # def test_show_user_following_no_user(self):
-    #     """Show unauthorized if no user for user following?"""
+    def test_invalid_user_details(self):
+        """404 if invalid user?"""
 
-    #     with self.client as c:
+        with self.client as c:
+            resp = c.get('/users/12345678')
 
-    #         resp = c.get("/users/1/following", follow_redirects=True)
+            self.assertEqual(resp.status_code, 404)
 
-    #         self.assertEqual(resp.status_code, 200)
+    
+    def test_show_user_following(self):
+        """Show user following?"""
 
-    #         self.assertIn("unauthorized", str(resp.data))
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
+            resp = c.get("/users/1/following")
 
-    # def test_show_user_followers(self):
-    #     """Show user followers?"""
+            self.assertEqual(resp.status_code, 200)
 
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.testuser.id
+            self.assertIn("Unfollow", str(resp.data))
 
-    #         resp = c.get("/users/1/followers")
+    def test_show_user_following_invalid_user(self):
+        """Show unauthorized if invalid user for user following?"""
 
-    #         self.assertEqual(resp.status_code, 200)
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = 12345678
 
-    #         self.assertIn("Follow", str(resp.data))
+            resp = c.get("/users/1/following", follow_redirects=True)
 
-    # def test_show_user_followers_invalid_user(self):
-    #     """Show unauthorized if invalid user for user followers?"""
+            self.assertEqual(resp.status_code, 200)
 
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = 12345678
-
-    #         resp = c.get("/users/1/followers", follow_redirects=True)
-
-    #         self.assertEqual(resp.status_code, 200)
-
-    #         self.assertIn("unauthorized", str(resp.data))
+            self.assertIn("unauthorized", str(resp.data))
 
 
-    # def test_show_user_followers_no_user(self):
-    #     """Show unauthorized if no user for user followers?"""
+    def test_show_user_following_no_user(self):
+        """Show unauthorized if no user for user following?"""
 
-    #     with self.client as c:
+        with self.client as c:
 
-    #         resp = c.get("/users/1/following", follow_redirects=True)
+            resp = c.get("/users/1/following", follow_redirects=True)
 
-    #         self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.status_code, 200)
 
-    #         self.assertIn("unauthorized", str(resp.data))
-
-
-    # def test_show_user_likes(self):
-    #     """Show user likes?"""
-
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.testuser.id
-
-    #         resp = c.get("/users/1/likes")
-
-    #         self.assertEqual(resp.status_code, 200)
-
-    #         self.assertIn("col-sm-6", str(resp.data))
-
-    # def test_show_user_likes_invalid_user(self):
-    #     """Show unauthorized if invalid user for user likes?"""
-
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = 12345678
-
-    #         resp = c.get("/users/1/likes", follow_redirects=True)
-
-    #         self.assertEqual(resp.status_code, 200)
-
-    #         self.assertIn("unauthorized", str(resp.data))
+            self.assertIn("unauthorized", str(resp.data))
 
 
-    # def test_show_user_likes_no_user(self):
-    #     """Show unauthorized if no user for user likes?"""
+    def test_show_user_followers(self):
+        """Show user followers?"""
 
-    #     with self.client as c:
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
 
-    #         resp = c.get("/users/1/likes", follow_redirects=True)
+            resp = c.get("/users/1/followers")
 
-    #         self.assertEqual(resp.status_code, 200)
+            self.assertEqual(resp.status_code, 200)
 
-    #         self.assertIn("unauthorized", str(resp.data))
+            self.assertIn("Follow", str(resp.data))
+
+    def test_show_user_followers_invalid_user(self):
+        """Show unauthorized if invalid user for user followers?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = 12345678
+
+            resp = c.get("/users/1/followers", follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("unauthorized", str(resp.data))
+
+
+    def test_show_user_followers_no_user(self):
+        """Show unauthorized if no user for user followers?"""
+
+        with self.client as c:
+
+            resp = c.get("/users/1/following", follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("unauthorized", str(resp.data))
+
+
+    def test_show_user_likes(self):
+        """Show user likes?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get("/users/1/likes")
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("col-sm-6", str(resp.data))
+
+    def test_show_user_likes_invalid_user(self):
+        """Show unauthorized if invalid user for user likes?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = 12345678
+
+            resp = c.get("/users/1/likes", follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("unauthorized", str(resp.data))
+
+
+    def test_show_user_likes_no_user(self):
+        """Show unauthorized if no user for user likes?"""
+
+        with self.client as c:
+
+            resp = c.get("/users/1/likes", follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("unauthorized", str(resp.data))
 
 
     def test_add_follow(self):
@@ -311,3 +311,102 @@ class UserViewTestCase(TestCase):
             self.assertEqual(resp.status_code, 200)
 
             self.assertIn("unauthorized", str(resp.data))
+
+
+    def test_user_profile_view(self):
+        """Show user profile?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.get('/users/profile')
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("To confirm changes", str(resp.data))
+
+
+    def test_user_profile_view_no_user(self):
+        """Unauthorized if no user?"""
+
+        with self.client as c:
+
+            resp = c.get('/users/profile', follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("unauthorized", str(resp.data))
+
+
+    def test_update_user_profile(self):
+        """Can update user info?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            user = User.query.get(self.testuser.id)
+
+            resp = c.post('/users/profile', data={"username": user.username, "password": "testuser", "email": "newemail@test.com"}, follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("Updated", str(resp.data))
+
+    def test_update_user_profile_incorrect_password(self):
+        """Unquthorized if wrong password?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            user = User.query.get(self.testuser.id)
+
+            resp = c.post('/users/profile', data={"username": user.username, "password": "this is the wrong password", "email": "newemail@test.com"}, follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("Incorrect", str(resp.data))
+
+    
+    def test_delete_user(self):
+        """Delete user?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.post('/users/delete', follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("Join Warbler today.", str(resp.data))
+
+            user = User.query.get(self.testuser.id)
+
+            self.assertIsNone(user)
+
+
+    def test_delete_user_no_user(self):
+        """Unauthorized if no user for delete user?"""
+
+        with self.client as c:
+            resp = c.post('/users/delete', follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("unauthorized", str(resp.data))
+            
+
+    # def test_add_like(self):
+    #     """Add like?"""
+
+    #     with self.client as c:
+    #         with c.session_transaction() as sess:
+    #             sess[CURR_USER_KEY] = self.testuser.id
+
+            
+   
+   
+
