@@ -31,7 +31,7 @@ db.create_all()
 
 
 class UserModelTestCase(TestCase):
-    """Test views for messages."""
+    """Test user model."""
 
     def setUp(self):
         """Create test client, add sample data."""
@@ -40,16 +40,18 @@ class UserModelTestCase(TestCase):
         Message.query.delete()
         Follows.query.delete()
 
-        user1 = User(
+        user1 = User.signup(
             username="testuser1",
             password="password",
-            email="testing@testing.com"
+            email="testing@testing.com",
+            image_url=None
         )
 
-        user2 = User(
+        user2 = User.signup(
             username="testuser2",
             password="password2",
-            email="testing2@testing.com"
+            email="testing2@testing.com",
+            image_url=None
         )
 
         db.session.add(user1)
@@ -169,3 +171,17 @@ class UserModelTestCase(TestCase):
         user = User.authenticate(username="testuser1", password="password")
 
         self.assertTrue(user)
+
+
+    def test_authenticate_incorrect_username(self):
+        """Fail authentication when incorrect username?"""
+
+        user = User.authenticate(username="INVALID", password="password")
+
+        self.assertFalse(user)
+
+
+    def test_authenticate_incorrect_password(self):
+        """Fail authentication when incorrect password?"""
+
+        user = User.authenticate(username="testuser1", password="INVALID")
