@@ -270,7 +270,7 @@ def delete_user():
     return redirect("/signup")
 
 
-@app.route('/users/add_like/<int:message_id>', methods=["POST"])
+@app.route('/users/add-like/<int:message_id>', methods=["POST"])
 def like_message(message_id):
     """Likes (or unlikes) a message."""
 
