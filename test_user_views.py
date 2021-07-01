@@ -4,7 +4,7 @@ import os
 from typing import Type
 from unittest import TestCase
 
-from models import db, connect_db, Message, User, Follows
+from models import db, connect_db, Message, User, Follows, Likes
 
 os.environ['DATABASE_URL'] = "postgresql:///warbler-test"
 
@@ -24,6 +24,7 @@ class UserViewTestCase(TestCase):
         User.query.delete()
         Message.query.delete()
         Follows.query.delete()
+        Likes.query.delete()
 
         self.client = app.test_client()
 
@@ -42,10 +43,13 @@ class UserViewTestCase(TestCase):
 
         db.session.commit()
 
+        message1 = Message(id=1, user_id=2, text="test message")
+
         follow1 = Follows(user_being_followed_id=1, user_following_id=2)
 
         follow2 = Follows(user_being_followed_id=2, user_following_id=1)
 
+        db.session.add(message1)
         db.session.add(follow1)
         db.session.add(follow2)
 
@@ -399,14 +403,59 @@ class UserViewTestCase(TestCase):
             self.assertIn("unauthorized", str(resp.data))
             
 
-    # def test_add_like(self):
-    #     """Add like?"""
+    def test_add_like(self):
+        """Add like?"""
 
-    #     with self.client as c:
-    #         with c.session_transaction() as sess:
-    #             sess[CURR_USER_KEY] = self.testuser.id
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            resp = c.post('/users/add-like/1', follow_redirects=True)
+
+            like = Likes.query.first()
+
+            user = User.query.get(self.testuser.id)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertEqual(like.user_id, 1)
+
+            self.assertEqual(like.message_id, 1)
+
+            self.assertEqual(len(user.likes), 1)
+
+
+    def test_unlike(self):
+        """Unlike?"""
+
+        with self.client as c:
+            with c.session_transaction() as sess:
+                sess[CURR_USER_KEY] = self.testuser.id
+
+            #Like
+            resp1 = c.post('/users/add-like/1')
+
+            #Unlike
+            resp2 = c.post('/users/add-like/1', follow_redirects=True)
+
+            like = Likes.query.first()
+
+            user = User.query.get(self.testuser.id)
+
+            self.assertEqual(resp2.status_code, 200)
+
+            self.assertIsNone(like)
+
+            self.assertEqual(len(user.likes), 0)
 
             
-   
-   
+    
+    def test_add_like_no_user(self):
+        """Unauthorized if no user on add like?"""
 
+        with self.client as c:
+            resp = c.post('/users/add-like/1', follow_redirects=True)
+
+            self.assertEqual(resp.status_code, 200)
+
+            self.assertIn("Must be logged in", str(resp.data))
